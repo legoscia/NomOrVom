@@ -44,7 +44,6 @@ chrome.runtime.onConnect.addListener(function(port){
 				{
 					var pageDoc = xhr.responseXML;
 					var addressElement = pageDoc.querySelector('span.address');
-					//console.log(addressELement);
 
 					var streetAddress = "";
 					var streetAddressElement = addressElement.querySelector('span[itemprop="streetAddress"]');
@@ -58,7 +57,7 @@ chrome.runtime.onConnect.addListener(function(port){
 					var postcodeElement = addressElement.querySelector('span[itemprop="postalCode"]');
 					if (postcodeElement) postcode = postcodeElement.innerHTML.trim();
 
-					var restaurantAddress = streetAddress + " " + addressLocality + " " + postcode;
+					var restaurantAddress = streetAddress + " " + postcode;
 					
 			  		var url = "http://api.ratings.food.gov.uk/Establishments?name=" + encodeURIComponent(restaurant.name) + "&address=" + encodeURIComponent(restaurantAddress); 
 
@@ -76,7 +75,7 @@ chrome.runtime.onConnect.addListener(function(port){
 								rating = -1;
 							}
 							console.log(restaurant.id + " " + rating);
-							//port.postMessage({id:restaurant.id, rating:rating});
+							port.postMessage({id:restaurant.id, rating:rating});
 						}
 					};
 					xhrFood.open("GET", url, true);

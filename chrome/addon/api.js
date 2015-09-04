@@ -173,9 +173,45 @@ if (window.location.href.indexOf("just-eat.co.uk") > -1) {
 if (window.location.href.indexOf("hungryhouse.co.uk") > -1) {
 	var restaurantEntries = document.querySelectorAll('div.restsSearchItemRes'); 
 
-	// a.restPageLink');
-
 	var port = chrome.runtime.connect({name:"linkedPageScoreLookup"});
+
+	// Set up the listener for the result returned from the addon script
+	port.onMessage.addListener(function(restaurantScore) {
+		// find the score placeholder for the restaurant we've got a result for
+		var restaurantScorePlaceholder = document.querySelector("div.restsSearchItemRes[data-nomorvom-id='"+restaurantScore.id+"'] div#nomorvom");
+		restaurantScorePlaceholder.setAttribute('data-rating', restaurantScore.rating);
+		RemoveElement('p#nomorvom_loading', restaurantScorePlaceholder);
+		RemoveElement('div#nomorvom_progressbar', restaurantScorePlaceholder);
+		
+		if (restaurantScore.rating > 0) {
+			for (var i = 0; i < restaurantScore.rating; i++) {
+				AppendImg(restaurantScorePlaceholder, '48-fork-and-knife-icon.png');
+			}
+			for (var i = 0; i < 5 - restaurantScore.rating; i++) {
+				AppendImg(restaurantScorePlaceholder, 'toilet-paper-icon_32.png');
+			}
+		}
+
+		var resultText = document.createElement('div');
+		resultText.id = "nomorvom_hygieneScore"
+
+		if (restaurantScore.rating == "AwaitingInspection") {
+			resultText.textContent = "This takeaway is awaiting inspection";					
+			restaurantScore.rating = 0;
+		}	
+		else {
+			if (restaurantScore.rating == -1) {
+				resultText.textContent = "Sorry, no food hygiene data found";
+			}
+			else {
+				resultText.textContent = "Hygiene Score : " + restaurantScore.rating + "/5";
+			}
+		}
+		restaurantScorePlaceholder.appendChild(resultText);
+
+		// Filter accordingly
+//		ApplyFilter($(scoreFilterSlider).slider("values"), restaurantEntries, document.getElementById('nomorvom_config_excludeNoData_checkbox').checked);
+	});
 
 	var restaurantId = 0;
 
