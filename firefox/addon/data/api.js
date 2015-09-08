@@ -99,47 +99,52 @@ function CreateConfigElement() {
 	config.appendChild(excludeNoDataLabel);
 	return config;
 }
-var restaurantEntries = document.querySelectorAll('div.restaurant:not(.offlineRestaurant)');
-var config = CreateConfigElement()
-var restaurantsDiv = document.querySelector("div.restaurants");
-restaurantsDiv.insertBefore(config, restaurantsDiv.firstChild);
-self.port.on("restaurantScore", function(restaurantScore) {
-	var restaurantScorePlaceholder = document.querySelector("div.restaurant[data-nomorvom-id='"+restaurantScore.id+"'] div#nomorvom");
-	restaurantScorePlaceholder.setAttribute('data-rating', restaurantScore.rating);
-	RemoveElement('p#nomorvom_loading', restaurantScorePlaceholder);
-	RemoveElement('div#nomorvom_progressbar', restaurantScorePlaceholder);
-	if (restaurantScore.rating > 0) {
-		for (var i = 0; i < restaurantScore.rating; i++) {
-			AppendImg(restaurantScorePlaceholder, '48-fork-and-knife-icon.png');
+
+
+// Just-Eat
+if (window.location.href.indexOf("just-eat.co.uk") > -1) {
+	var restaurantEntries = document.querySelectorAll('div.restaurant:not(.offlineRestaurant)');
+	var config = CreateConfigElement()
+	var restaurantsDiv = document.querySelector("div.restaurants");
+	restaurantsDiv.insertBefore(config, restaurantsDiv.firstChild);
+	self.port.on("restaurantScore", function(restaurantScore) {
+		var restaurantScorePlaceholder = document.querySelector("div.restaurant[data-nomorvom-id='"+restaurantScore.id+"'] div#nomorvom");
+		restaurantScorePlaceholder.setAttribute('data-rating', restaurantScore.rating);
+		RemoveElement('p#nomorvom_loading', restaurantScorePlaceholder);
+		RemoveElement('div#nomorvom_progressbar', restaurantScorePlaceholder);
+		if (restaurantScore.rating > 0) {
+			for (var i = 0; i < restaurantScore.rating; i++) {
+				AppendImg(restaurantScorePlaceholder, '48-fork-and-knife-icon.png');
+			}
+			for (var i = 0; i < 5 - restaurantScore.rating; i++) {
+				AppendImg(restaurantScorePlaceholder, 'toilet-paper-icon_32.png');
+			}
 		}
-		for (var i = 0; i < 5 - restaurantScore.rating; i++) {
-			AppendImg(restaurantScorePlaceholder, 'toilet-paper-icon_32.png');
-		}
-	}
-	var resultText = document.createElement('div');
-	resultText.id = "nomorvom_hygieneScore"
-	if (restaurantScore.rating == "AwaitingInspection") {
-		resultText.textContent = "This takeaway is awaiting inspection";					
-		restaurantScore.rating = 0;
-	}	
-	else {
-		if (restaurantScore.rating == -1) {
-			resultText.textContent = "Sorry, no food hygiene data found";
-		}
+		var resultText = document.createElement('div');
+		resultText.id = "nomorvom_hygieneScore"
+		if (restaurantScore.rating == "AwaitingInspection") {
+			resultText.textContent = "This takeaway is awaiting inspection";					
+			restaurantScore.rating = 0;
+		}	
 		else {
-			resultText.textContent = "Hygiene Score : " + restaurantScore.rating + "/5";
+			if (restaurantScore.rating == -1) {
+				resultText.textContent = "Sorry, no food hygiene data found";
+			}
+			else {
+				resultText.textContent = "Hygiene Score : " + restaurantScore.rating + "/5";
+			}
 		}
-	}
-	restaurantScorePlaceholder.appendChild(resultText);
-	ApplyFilter($(scoreFilterSlider).slider("values"), restaurantEntries, document.getElementById('nomorvom_config_excludeNoData_checkbox').checked);
-});
-var restaurantId = 0;
-Array.prototype.forEach.call(restaurantEntries, function (el, i) {
-    var name = el.querySelector('h2.name a').textContent.trim(); 
-    var address = el.querySelector('p.address').childNodes[0].textContent.trim();
-    self.port.emit("queryRestaurant", {id:restaurantId, name:name, address:address});
-	var scorePlaceholder = CreateScorePlaceholderElement(self.options.prefixDataURI + 'loading.gif');
-    el.setAttribute('data-nomorvom-id', restaurantId);
-    el.appendChild(scorePlaceholder);
-    restaurantId++;
-});
+		restaurantScorePlaceholder.appendChild(resultText);
+		ApplyFilter($(scoreFilterSlider).slider("values"), restaurantEntries, document.getElementById('nomorvom_config_excludeNoData_checkbox').checked);
+	});
+	var restaurantId = 0;
+	Array.prototype.forEach.call(restaurantEntries, function (el, i) {
+	    var name = el.querySelector('h2.name a').textContent.trim(); 
+	    var address = el.querySelector('p.address').childNodes[0].textContent.trim();
+	    self.port.emit("queryRestaurant", {id:restaurantId, name:name, address:address});
+		var scorePlaceholder = CreateScorePlaceholderElement(self.options.prefixDataURI + 'loading.gif');
+	    el.setAttribute('data-nomorvom-id', restaurantId);
+	    el.appendChild(scorePlaceholder);
+	    restaurantId++;
+	});
+}
