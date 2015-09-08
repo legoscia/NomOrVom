@@ -36,11 +36,33 @@ function ApplyFilter(ratingFilterRange, restaurantEntries, excludeNoData) {
 	});
 }
 
-// Just-Eat
-if (window.location.href.indexOf("just-eat.co.uk") > -1) {
+function CreateScorePlaceholderElement(loadingImageSource) {
+    var scorePlaceholder = document.createElement('div');
+	scorePlaceholder.id = "nomorvom";
+	
+	var loadingText = document.createElement('p');
+	loadingText.id = "nomorvom_loading";
+	loadingText.textContent = "Loading food scores...";
+	
+    var loaderImg = document.createElement('div');
+	loaderImg.id = "nomorvom_progressbar";
 
-	var restaurantEntries = document.querySelectorAll('div.restaurant:not(.offlineRestaurant)');
+	var img = new Image();
+	img.onload = function() {
+  		loaderImg.appendChild(img);
+	};
 
+	img.src = loadingImageSource;
+	
+	scorePlaceholder.appendChild(loadingText);
+	scorePlaceholder.appendChild(loaderImg);
+	
+	scorePlaceholder.setAttribute('data-rating', 0);
+
+	return scorePlaceholder;
+}
+
+function CreateConfigElement() {
 	var config = document.createElement('div');
 	config.id = "nomorvom_config"
 
@@ -87,6 +109,16 @@ if (window.location.href.indexOf("just-eat.co.uk") > -1) {
 	excludeNoDataLabel.appendChild(excludeNoDataCheckbox);
 
 	config.appendChild(excludeNoDataLabel);
+
+	return config;
+}
+
+// Just-Eat
+if (window.location.href.indexOf("just-eat.co.uk") > -1) {
+
+	var restaurantEntries = document.querySelectorAll('div.restaurant:not(.offlineRestaurant)');
+
+	var config = CreateConfigElement();
 
 	var restaurantsDiv = document.querySelector("div.restaurants");
 	restaurantsDiv.insertBefore(config, restaurantsDiv.firstChild);
@@ -140,27 +172,7 @@ if (window.location.href.indexOf("just-eat.co.uk") > -1) {
 
 		port.postMessage({id:restaurantId, name:name, address:address});
 	    
-	    var scorePlaceholder = document.createElement('div');
-		scorePlaceholder.id = "nomorvom";
-		
-		var loadingText = document.createElement('p');
-		loadingText.id = "nomorvom_loading";
-		loadingText.textContent = "Loading food scores...";
-		
-	    var loaderImg = document.createElement('div');
-		loaderImg.id = "nomorvom_progressbar";
-
-		var img = new Image();
-		img.onload = function() {
-	  		loaderImg.appendChild(img);
-		};
-
-		img.src = chrome.extension.getURL('loading.gif');
-		
-		scorePlaceholder.appendChild(loadingText);
-		scorePlaceholder.appendChild(loaderImg);
-		
-		scorePlaceholder.setAttribute('data-rating', 0);
+		var scorePlaceholder = CreateScorePlaceholderElement(chrome.extension.getURL('loading.gif'));
 		
 		el.setAttribute('data-nomorvom-id', restaurantId);
 
@@ -225,28 +237,8 @@ if (window.location.href.indexOf("hungryhouse.co.uk") > -1) {
 
 		port.postMessage({id:restaurantId, name:name, fullPageUri:fullPageUri});
 	    
-	    var scorePlaceholder = document.createElement('div');
-		scorePlaceholder.id = "nomorvom";
-		
-		var loadingText = document.createElement('p');
-		loadingText.id = "nomorvom_loading";
-		loadingText.textContent = "Loading food scores...";
-		
-	    var loaderImg = document.createElement('div');
-		loaderImg.id = "nomorvom_progressbar";
+	    var scorePlaceholder = CreateScorePlaceholderElement(chrome.extension.getURL('loading.gif'));
 
-		var img = new Image();
-		img.onload = function() {
-	  		loaderImg.appendChild(img);
-		};
-
-		img.src = chrome.extension.getURL('loading.gif');
-		
-		scorePlaceholder.appendChild(loadingText);
-		scorePlaceholder.appendChild(loaderImg);
-		
-		scorePlaceholder.setAttribute('data-rating', 0);
-		
 		el.setAttribute('data-nomorvom-id', restaurantId);
 
 	    el.appendChild(scorePlaceholder);
