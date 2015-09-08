@@ -36,7 +36,7 @@ chrome.runtime.onConnect.addListener(function(port){
 	}
 	if(port.name == "linkedPageScoreLookup") {
 		port.onMessage.addListener(function(restaurant) {
-			console.log(restaurant.name + " " + restaurant.fullPageUri);
+			//console.log(restaurant.name + " " + restaurant.fullPageUri);
 			
 			var xhr = new XMLHttpRequest();
 			xhr.onload = function() {
@@ -46,20 +46,18 @@ chrome.runtime.onConnect.addListener(function(port){
 					var addressElement = pageDoc.querySelector('span.address');
 
 					var streetAddress = "";
+					var restaurantAddress = "";
+
 					var streetAddressElement = addressElement.querySelector('span[itemprop="streetAddress"]');
-					if (streetAddressElement) streetAddress = streetAddressElement.innerHTML.trim();
+					if (streetAddressElement) restaurantAddress += streetAddressElement.innerHTML.trim();
 
-					var addressLocality = "";
 					var addressLocalityElement = addressElement.querySelector('span[itemprop="addressLocality"]')
-					if (addressLocalityElement) addressLocality = addressLocalityElement.innerHTML.trim(); 
+					if (addressLocalityElement) restaurantAddress += ", " + addressLocalityElement.innerHTML.trim(); 
 
-					var postcode = "";
 					var postcodeElement = addressElement.querySelector('span[itemprop="postalCode"]');
-					if (postcodeElement) postcode = postcodeElement.innerHTML.trim();
-
-					var restaurantAddress = streetAddress + " " + postcode;
+					if (postcodeElement) restaurantAddress += ", " + postcodeElement.innerHTML.trim();
 					
-			  		var url = "http://api.ratings.food.gov.uk/Establishments?name=" + encodeURIComponent(restaurant.name) + "&address=" + encodeURIComponent(restaurantAddress); 
+			  		var url = "http://api.ratings.food.gov.uk/Establishments?address=" + encodeURIComponent(restaurantAddress); 
 
 					var rating = 0;
 
@@ -74,7 +72,7 @@ chrome.runtime.onConnect.addListener(function(port){
 							else {
 								rating = -1;
 							}
-							console.log(restaurant.id + " " + rating);
+								//console.log(restaurant.id + " " + restaurant.name + " " + restaurantAddress);
 							port.postMessage({id:restaurant.id, rating:rating});
 						}
 					};
