@@ -45,7 +45,6 @@ chrome.runtime.onConnect.addListener(function(port){
 					var pageDoc = xhr.responseXML;
 					var addressElement = pageDoc.querySelector('span.address');
 
-					var streetAddress = "";
 					var restaurantAddress = "";
 
 					var streetAddressElement = addressElement.querySelector('span[itemprop="streetAddress"]');
@@ -71,8 +70,8 @@ chrome.runtime.onConnect.addListener(function(port){
 							}
 							else {
 								rating = -1;
-							}
 								//console.log(restaurant.id + " " + restaurant.name + " " + restaurantAddress);
+							}
 							port.postMessage({id:restaurant.id, rating:rating});
 						}
 					};
